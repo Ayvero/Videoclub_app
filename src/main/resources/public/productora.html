@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Productoras</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <ul>
+        <li><a href="index.html">Películas</a></li>
+        <li><a href="ciudad.html">Ciudades</a></li>
+        <li><a href="departamento.html">Departamentos</a></li>
+        <li><a href="pais.html">Paises</a></li>
+        <li><a href="distribuidor.html">Distribuidores</a></li>
+        <li><a href="productora.html">Productoras</a></li>
+        <li><a href="internacional.html">Internacionales</a></li>
+        <li><a href="nacional.html">Nacionales</a></li>
+        <li><a href="empleado.html">Empleados</a></li>
+        <li><a href="entrega.html">Entregas</a></li>
+        <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+        <li><a href="tarea.html">Tareas</a></li>
+        <li><a href="video.html">Videos</a></li>
+        <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+
+    </ul>
+</nav>
+
+<div class="container">
+
+<h1>🎬 Videoteca</h1>
+
+<!-- Tabla de Productoras -->
+<table id="tabla-productora">
+    <thead>
+    <tr>
+        <th>Codigo productora</th>
+        <th>Nombre productora</th>
+        <th>Id ciudad</th>
+    </tr>
+    </thead>
+</div>
+
+    <tbody>
+    <!-- Se carga dinámicamente -->
+    </tbody>
+</table>
+
+<!-- Formulario para agregar o editar  -->
+<h2 id="formTitle">Agregar nueva productora</h2>
+<form id="agregarProductora">
+    <input type="text" id="codigo_productora" placeholder="Codigo Productora" required>
+    <input type="text" id="nombre_productora" placeholder="Nombre de la productora" required>
+    <input type="text" id="id_ciudad" placeholder="Id de la ciudad" required>
+    <button type="submit">Guardar</button>
+</form>
+
+<script>
+    let modoEditar = false; // Variable global para saber si estamos editando
+    let idProductoraEditar = null;
+
+    function cargarProductora() {
+        fetch("/productoras")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#tabla-productora tbody");
+                tbody.innerHTML = "";
+
+                data.forEach(p => {
+                    const fila = document.createElement("tr");
+                    fila.innerHTML = `
+            <td>${p.codigo_productora}</td>
+            <td>${p.nombre_productora}</td>
+            <td>${p.id_ciudad}</td>
+            <td>
+              <button onclick="editar('${p.codigo_productora}', '${p.nombre_productora}','${p.id_ciudad}')">✏️ Editar</button>
+              <button onclick="eliminar('${p.codigo_productora}')">🗑️ Eliminar</button>
+            </td>
+          `;
+                    tbody.appendChild(fila);
+                });
+            });
+    }
+
+    cargarProductora();
+
+    document.getElementById("agregarProductora").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const productora = {
+            codigo_productora: document.getElementById("codigo_productora").value,
+            nombre_productora: document.getElementById("nombre_productora").value,
+            id_ciudad: document.getElementById("id_ciudad").value
+        };
+
+        let url = "/productoras";
+        let method = "POST";
+
+        if (modoEditar) {
+            url = `/productoras/${idProductoraEditar}`;
+            method = "PUT";
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(productora)
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => { throw new Error(text); });
+                }
+                return res.text();
+            })
+            .then(() => {
+                alert(modoEditar ? "Productora actualizada" : "Productora agregada");
+                document.getElementById("agregarProductora").reset();
+                document.getElementById("formTitle").textContent = "Agregar nueva productora";
+                document.getElementById("codigo_productora").disabled = false; // Volvemos a habilitar el ID
+                modoEditar = false;
+                idProductoraEditar = null;
+                cargarProductora();
+            })
+            .catch(err => {
+                alert("Error: " + err.message);
+            });
+    });
+
+    function editar(codigo_productora, nombre_productora, id_ciudad) {
+        modoEditar = true;
+        idProductoraEditar = codigo_productora;
+
+        document.getElementById("formTitle").textContent = "Editar productora";
+        document.getElementById("codigo_productora").value = codigo_productora;
+        document.getElementById("nombre_productora").value = nombre_productora;
+        document.getElementById("id_ciudad").value = id_ciudad;
+        document.getElementById("codigo_productora").disabled = true; // No dejamos editar el ID
+    }
+
+    function eliminar(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar esta productora?")) {
+            fetch(`/productoras/${id}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    alert("Productora eliminada con éxito.");
+                    cargarProductora();
+                })
+                .catch(error => {
+                    alert("Error al eliminar productora: " + error.message);
+                });
+        }
+    }
+</script>
+
+</body>
+</html>

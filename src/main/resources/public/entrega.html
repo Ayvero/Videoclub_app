@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Entregas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <ul>
+        <li><a href="index.html">Películas</a></li>
+        <li><a href="ciudad.html">Ciudades</a></li>
+        <li><a href="departamento.html">Departamentos</a></li>
+        <li><a href="pais.html">Paises</a></li>
+        <li><a href="distribuidor.html">Distribuidores</a></li>
+        <li><a href="productora.html">Productoras</a></li>
+        <li><a href="internacional.html">Internacionales</a></li>
+        <li><a href="nacional.html">Nacionales</a></li>
+        <li><a href="empleado.html">Empleados</a></li>
+        <li><a href="entrega.html">Entregas</a></li>
+        <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+        <li><a href="tarea.html">Tareas</a></li>
+        <li><a href="video.html">Videos</a></li>
+        <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+        <li><a href="entrega.html">Entregas</a></li>
+
+    </ul>
+</nav>
+<div class="container">
+    <h1>🎬 Videoteca</h1>
+
+    <!-- Tabla de Productoras -->
+    <table id="tabla-Mostrar">
+        <thead>
+        <tr>
+            <th>Nro entrega</th>
+            <th>fecha entrega</th>
+            <th>id video </th>
+            <th>id distribuidor </th>
+        </tr>
+        </thead>
+
+</div>
+<tbody>
+<!-- Se carga dinámicamente -->
+</tbody>
+</table>
+
+<!-- Formulario para agregar o editar  -->
+<h2 id="formTitle">Agregar nuevo</h2>
+<form id="agregar">
+    <input type="text" id="nro_entrega" placeholder="nro entrega" required>
+    <input type="text" id="fecha_entrega" placeholder="fecha entrega" required>
+    <input type="text" id="id_video" placeholder="id video" required>
+    <input type="text" id="id_distribuidor" placeholder="id distribuidor" required>
+
+
+    <button type="submit">Guardar</button>
+</form>
+
+<script>
+    let modoEditar = false; // Variable global para saber si estamos editando
+    let idEditar = null;
+
+    function cargar() {
+        fetch("/entregas")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#tabla-Mostrar tbody");
+                tbody.innerHTML = "";
+
+                data.forEach(p => {
+                    const fila = document.createElement("tr");
+                    fila.innerHTML = `
+            <td>${p.nro_entrega}</td>
+            <td>${p.fecha_entrega}</td>
+             <td>${p.id_video}</td>
+             <td>${p.id_distribuidor}</td>
+
+            <td>
+              <button onclick="editar('${p.nro_entrega}','${p.fecha_entrega}','${p.id_video}','${p.id_distribuidor}')">✏️ Editar</button>
+              <button onclick="eliminar('${p.nro_entrega}')">🗑️ Eliminar</button>
+            </td>
+          `;
+                    tbody.appendChild(fila);
+                });
+            });
+    }
+
+    cargar();
+
+    document.getElementById("agregar").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const entrega = {
+            nro_entrega: document.getElementById("nro_entrega").value,
+            fecha_entrega: document.getElementById("fecha_entrega").value,
+            id_video: document.getElementById("id_video").value,
+            id_distribuidor: document.getElementById("id_distribuidor").value,
+
+        };
+
+        let url = "/entregas";
+        let method = "POST";
+
+        if (modoEditar) {
+            url = `/entregas/${idEditar}`;
+            method = "PUT";
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(entrega)
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => { throw new Error(text); });
+                }
+                return res.text();
+            })
+            .then(() => {
+                alert(modoEditar ? "Fila actualizada" : "Fila agregada");
+                document.getElementById("agregar").reset();
+                document.getElementById("formTitle").textContent = "Agregar nuevo";
+                document.getElementById("nro_entrega").disabled = false; // Volvemos a habilitar el ID
+                modoEditar = false;
+                idEditar = null;
+                cargar();
+            })
+            .catch(err => {
+                alert("Error: " + err.message);
+            });
+    });
+
+    function editar(nro_entrega,fecha_entrega, id_video, id_distribuidor) {
+        modoEditar = true;
+        idEditar = nro_entrega;
+
+        document.getElementById("formTitle").textContent = "Editar";
+        document.getElementById("nro_entrega").value = nro_entrega;
+        document.getElementById("fecha_entrega").value = fecha_entrega;
+        document.getElementById("id_video").value = id_video;
+        document.getElementById("id_distribuidor").value = id_distribuidor;
+        document.getElementById("nro_entrega").disabled = true; // No dejamos editar el ID
+    }
+
+    function eliminar(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar esta fila?")) {
+            fetch(`/entregas/${id}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    alert("Fila eliminada con éxito.");
+                    cargar();
+                })
+                .catch(error => {
+                    alert("Error al eliminar fila: " + error.message);
+                });
+        }
+    }
+</script>
+
+</body>
+</html>

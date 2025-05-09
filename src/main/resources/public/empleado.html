@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Empleados</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <ul>
+    <li><a href="index.html">Películas</a></li>
+    <li><a href="ciudad.html">Ciudades</a></li>
+    <li><a href="departamento.html">Departamentos</a></li>
+    <li><a href="pais.html">Paises</a></li>
+    <li><a href="distribuidor.html">Distribuidores</a></li>
+    <li><a href="productora.html">Productoras</a></li>
+    <li><a href="internacional.html">Internacionales</a></li>
+    <li><a href="nacional.html">Nacionales</a></li>
+    <li><a href="empleado.html">Empleados</a></li>
+    <li><a href="entrega.html">Entregas</a></li>
+    <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+    <li><a href="tarea.html">Tareas</a></li>
+    <li><a href="video.html">Videos</a></li>
+    <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+    <li><a href="entrega.html">Entregas</a></li>
+
+  </ul>
+</nav>
+<div class="container">
+  <h1>🎬 Videoteca</h1>
+
+  <!-- Tabla de Productoras -->
+  <table id="tabla-Mostrar">
+    <thead>
+    <tr>
+      <th>Id empleado</th>
+      <th>Nombre </th>
+      <th>Apellido</th>
+      <th>Porc comision</th>
+      <th>Sueldo</th>
+      <th>e_mail</th>
+      <th>Fecha nacimiento</th>
+      <th>Telefono</th>
+      <th>Id tarea</th>
+      <th>Id departamento</th>
+      <th>Id distribuidor</th>
+      <th>Id jefe</th>
+
+    </tr>
+    </thead>
+
+</div>
+<tbody>
+<!-- Se carga dinámicamente -->
+</tbody>
+</table>
+
+<!-- Formulario para agregar o editar  -->
+<h2 id="formTitle">Agregar nuevo</h2>
+<form id="agregar">
+  <input type="text" id="id_empleado" placeholder="Id empleado" required>
+  <input type="text" id="nombre" placeholder="nombre " required>
+  <input type="text" id="apellido" placeholder="apellido" required>
+  <input type="text" id="porc_comision" placeholder="porc_comision" required>
+  <input type="text" id="sueldo" placeholder="sueldo" required>
+  <input type="text" id="e_mail" placeholder="e_mail" required>
+  <input type="text" id="fecha_nacimiento" placeholder="fecha_nacimiento" required>
+  <input type="text" id="telefono" placeholder="telefono" required>
+  <input type="text" id="id_tarea" placeholder="Id tarea" required>
+  <input type="text" id="id_departamento" placeholder="id_departamento" required>
+  <input type="text" id="id_distribuidor" placeholder="id_distribuidor" required>
+  <input type="text" id="id_jefe" placeholder="id_jefe" required>
+
+
+
+
+  <button type="submit">Guardar</button>
+</form>
+
+<script>
+  let modoEditar = false; // Variable global para saber si estamos editando
+  let idEditar = null;
+
+  function cargar() {
+    fetch("/empleados")
+            .then(res => res.json())
+            .then(data => {
+              const tbody = document.querySelector("#tabla-Mostrar tbody");
+              tbody.innerHTML = "";
+
+              data.forEach(p => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+            <td>${p.id_empleado}</td>
+            <td>${p.nombre}</td>
+             <td>${p.apellido}</td>
+             <td>${p.porc_comision}</td>
+              <td>${p.sueldo}</td>
+            <td>${p.e_mail}</td>
+             <td>${p.fecha_nacimiento}</td>
+             <td>${p.telefono}</td>
+              <td>${p.id_tarea}</td>
+            <td>${p.id_departamento}</td>
+             <td>${p.id_distribuidor}</td>
+             <td>${p.id_jefe}</td>
+
+
+
+            <td>
+              <button onclick="editar('${p.id_empleado}','${p.nombre}','${p.apellido}','${p.porc_comision}','${p.sueldo}','${p.e_mail}','${p.fecha_nacimiento}','${p.telefono}','${p.id_tarea}','${p.id_departamento}','${p.id_distribuidor}','${p.id_jefe}')">✏️ Editar</button>
+              <button onclick="eliminar('${p.id_empleado}')">🗑️ Eliminar</button>
+            </td>
+          `;
+                tbody.appendChild(fila);
+              });
+            });
+  }
+
+  cargar();
+
+  document.getElementById("agregar").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const empleado = {
+      id_empleado: document.getElementById("id_empleado").value,
+      nombre: document.getElementById("nombre").value,
+      apellido: document.getElementById("apellido").value,
+      porc_comision: document.getElementById("porc_comision").value,
+      sueldo: document.getElementById("sueldo").value,
+      e_mail: document.getElementById("e_mail").value,
+      fecha_nacimiento: document.getElementById("fecha_nacimiento").value,
+      telefono: document.getElementById("telefono").value,
+      id_tarea: document.getElementById("id_tarea").value,
+      id_departamento: document.getElementById("id_departamento").value,
+      id_distribuidor: document.getElementById("id_distribuidor").value,
+      id_jefe: document.getElementById("id_jefe").value
+
+
+    };
+
+    let url = "/empleados";
+    let method = "POST";
+
+    if (modoEditar) {
+      url = `/empleados/${idEditar}`;
+      method = "PUT";
+    }
+
+    fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(empleado)
+    })
+            .then(res => {
+              if (!res.ok) {
+                return res.text().then(text => { throw new Error(text); });
+              }
+              return res.text();
+            })
+            .then(() => {
+              alert(modoEditar ? "Fila actualizada" : "Fila agregada");
+              document.getElementById("agregar").reset();
+              document.getElementById("formTitle").textContent = "Agregar nuevo";
+              document.getElementById("id_empleado").disabled = false; // Volvemos a habilitar el ID
+              modoEditar = false;
+              idEditar = null;
+              cargar();
+            })
+            .catch(err => {
+              alert("Error: " + err.message);
+            });
+  });
+
+  function editar(id_empleado,nombre, apellido,porc_comision, sueldo,e_mail, fecha_nacimiento,telefono, id_tarea, id_departamento,id_distribuidor, id_jefe) {
+    modoEditar = true;
+    idEditar = id_tarea;
+
+    document.getElementById("formTitle").textContent = "Editar";
+    document.getElementById("id_empleado").value = id_empleado;
+    document.getElementById("nombre").value = nombre;
+    document.getElementById("apellido").value = apellido;
+    document.getElementById("porc_comision").value = porc_comision;
+    document.getElementById("sueldo").value = sueldo;
+    document.getElementById("e_mail").value = e_mail;
+    document.getElementById("fecha_nacimiento").value = fecha_nacimiento;
+    document.getElementById("telefono").value = telefono;
+    document.getElementById("id_tarea").value = id_tarea;
+    document.getElementById("id_departamento").value = id_departamento;
+    document.getElementById("id_distribuidor").value = id_distribuidor;
+    document.getElementById("id_jefe").value = id_jefe;
+
+    document.getElementById("id_empleado").disabled = true; // No dejamos editar el ID
+  }
+
+  function eliminar(id) {
+    if (confirm("¿Estás seguro de que deseas eliminar esta fila?")) {
+      fetch(`/empleados/${id}`, {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (!response.ok) {
+                  return response.text().then(text => { throw new Error(text); });
+                }
+                alert("Fila eliminada con éxito.");
+                cargar();
+              })
+              .catch(error => {
+                alert("Error al eliminar fila: " + error.message);
+              });
+    }
+  }
+</script>
+
+</body>
+</html>

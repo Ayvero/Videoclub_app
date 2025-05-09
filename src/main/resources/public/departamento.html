@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Departamento</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <ul>
+    <li><a href="index.html">Películas</a></li>
+    <li><a href="ciudad.html">Ciudades</a></li>
+    <li><a href="departamento.html">Departamentos</a></li>
+    <li><a href="pais.html">Paises</a></li>
+    <li><a href="distribuidor.html">Distribuidores</a></li>
+    <li><a href="productora.html">Productoras</a></li>
+    <li><a href="internacional.html">Internacionales</a></li>
+    <li><a href="nacional.html">Nacionales</a></li>
+    <li><a href="empleado.html">Empleados</a></li>
+    <li><a href="entrega.html">Entregas</a></li>
+    <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+    <li><a href="tarea.html">Tareas</a></li>
+    <li><a href="video.html">Videos</a></li>
+    <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+
+
+  </ul>
+</nav>
+<div class="container">
+<h1>🎬 Videoteca</h1>
+
+<!-- Tabla de Departamentos -->
+<table id="tabla-departamento">
+  <thead>
+  <tr>
+    <th>id Departamento</th>
+    <th>id Distribuidor</th>
+    <th>Nombre</th>
+    <th>Calle</th>
+    <th>Numero</th>
+    <th>id Ciudad</th>
+    <th>Jefe Departamento</th>
+    <th>Acciones</th>
+  </tr>
+  </thead>
+
+</div>
+  <tbody>
+  <!-- Se carga dinámicamente -->
+  </tbody>
+</table>
+
+<!-- Formulario para agregar o editar departamento -->
+<h2 id="formTitle">Agregar nuevo Departamento</h2>
+<form id="agregarDepartamento">
+  <input type="text" id="idDepartamento" placeholder="id Departamento" required>  <!-- oculto, para editar -->
+  <input type="text" id="idDistribuidor" placeholder="id Distribuidor" required>
+  <input type="text" id="nombre" placeholder="Nombre del Departamento" required>
+  <input type="text" id="calle" placeholder="Calle" required>  <!-- oculto, para editar -->
+  <input type="text" id="numero" placeholder="Numero" required>
+  <input type="text" id="idCiudad" placeholder="Id de la Ciudad" required>
+  <input type="text" id="jefeDepartamento" placeholder="Id del jefe_Departamento" required>
+  <button type="submit">Guardar</button>
+</form>
+
+<script>
+  let modoEdicion = false;
+
+  function cargarDepartamento() {
+    fetch("/departamentos")
+            .then(res => res.json())
+            .then(data => {
+              const tbody = document.querySelector("#tabla-departamento tbody");
+              tbody.innerHTML = "";
+
+              data.forEach(p => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+            <td>${p.idDepartamento}</td>
+            <td>${p.idDistribuidor}</td>
+            <td>${p.nombre}</td>
+            <td>${p.calle}</td>
+            <td>${p.numero}</td>
+            <td>${p.idCiudad}</td>
+            <td>${p.jefeDepartamento}</td>
+            <td>
+              <button onclick="editar('${p.idDepartamento}', '${p.idDistribuidor}', '${p.nombre}', '${p.calle}', '${p.numero}', '${p.idCiudad}', '${p.jefeDepartamento}')">Editar</button>
+              <button onclick="eliminarDepartamento('${p.idDepartamento}', '${p.idDistribuidor}')">Borrar</button>
+            </td>
+          `;
+                tbody.appendChild(fila);
+              });
+            });
+  }
+
+  cargarDepartamento();
+
+  document.getElementById("agregarDepartamento").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const departamento = {
+      id_departamento: document.getElementById("idDepartamento").value,
+      id_distribuidor: document.getElementById("idDistribuidor").value,
+      nombre: document.getElementById("nombre").value,
+      calle: document.getElementById("calle").value,
+      numero: document.getElementById("numero").value,
+      id_ciudad: document.getElementById("idCiudad").value,
+      jefe_departamento: document.getElementById("jefeDepartamento").value
+    };
+
+    const rawIdDepartamento = departamento.id_departamento;
+    const rawIdDistribuidor = departamento.id_distribuidor;
+
+    // Verificamos si ambos IDs no están vacíos para considerar una actualización
+    const idDepartamento = rawIdDepartamento && rawIdDepartamento.trim() !== "" ? rawIdDepartamento : null;
+    const idDistribuidor = rawIdDistribuidor && rawIdDistribuidor.trim() !== "" ? rawIdDistribuidor : null;
+
+    // Determinamos si la operación es de actualización o creación según los IDs
+    const url = modoEdicion ? `/departamentos/${departamento.id_departamento}/${departamento.id_distribuidor}` : `/departamentos`;
+    const method = modoEdicion ? "PUT" : "POST";
+
+    console.log(departamento); // Agregalo antes del fetch para debug
+
+    fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(departamento)
+    })
+            .then(res => {
+              if (!res.ok) {
+                return res.text().then(texto => {
+                  throw new Error(texto);
+                });
+              }
+              return res.text();
+            })
+            .then(() => {
+              alert(idDepartamento && idDistribuidor ? "Departamento actualizado" : "Departamento agregado");
+              document.getElementById("agregarDepartamento").reset();
+
+              modoEdicion = false;
+              document.getElementById("formTitle").textContent = "Agregar nuevo Departamento";
+              document.getElementById("idDepartamento").value = "";
+              document.getElementById("idDistribuidor").value = "";
+              cargarDepartamento();
+            })
+            .catch(err => {
+              alert("Error: " + err.message);
+            });
+  });
+
+  // Función para editar departamento
+  function editar(id_departamento, id_distribuidor, nombre, calle, numero, id_ciudad, jefe_departamento) {
+    document.getElementById("formTitle").textContent = "Editar departamento";
+    document.getElementById("idDepartamento").value = id_departamento;
+    document.getElementById("idDistribuidor").value = id_distribuidor;
+    document.getElementById("nombre").value = nombre;
+    document.getElementById("calle").value = calle;
+    document.getElementById("numero").value = numero;
+    document.getElementById("idCiudad").value = id_ciudad;
+    document.getElementById("jefeDepartamento").value = jefe_departamento;
+
+    modoEdicion = true; // Activamos el modo de edición
+  }
+
+  // Función para eliminar departamento
+  function eliminarDepartamento(id_departamento, id_distribuidor) {
+    if (confirm("¿Estás seguro de que deseas eliminar este departamento?")) {
+      fetch(`/departamentos/${id_departamento}/${id_distribuidor}`, {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (!response.ok) {
+                  return response.text().then(text => {
+                    throw new Error(text);
+                  });
+                }
+                alert("Departamento eliminado con éxito.");
+                cargarDepartamento();
+              })
+              .catch(error => {
+                alert("Error al eliminar departamento: " + error.message);
+              });
+    }
+  }
+</script>
+
+</body>
+</html>

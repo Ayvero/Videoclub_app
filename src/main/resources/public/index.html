@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Videoteca App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- navbar.html o como parte de cada archivo -->
+<nav class="navbar">
+    <ul>
+        <li><a href="index.html">Películas</a></li>
+        <li><a href="ciudad.html">Ciudades</a></li>
+        <li><a href="departamento.html">Departamentos</a></li>
+        <li><a href="pais.html">Paises</a></li>
+        <li><a href="distribuidor.html">Distribuidores</a></li>
+        <li><a href="productora.html">Productoras</a></li>
+        <li><a href="internacional.html">Internacionales</a></li>
+        <li><a href="nacional.html">Nacionales</a></li>
+        <li><a href="empleado.html">Empleados</a></li>
+        <li><a href="entrega.html">Entregas</a></li>
+        <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+        <li><a href="tarea.html">Tareas</a></li>
+        <li><a href="video.html">Videos</a></li>
+        <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+        <li><a href="entrega.html">Entregas</a></li>
+
+    </ul>
+</nav>
+
+<div class="container">
+<h1>🎬 Videoteca</h1>
+
+<!-- Tabla de Películas -->
+<table id="tabla-peliculas">
+    <thead>
+    <tr>
+        <th>Código</th>
+        <th>Título</th>
+        <th>Idioma</th>
+        <th>Formato</th>
+        <th>Género</th>
+        <th>Productora</th>
+        <th>Acciones</th>
+    </tr>
+
+    </thead>
+</div>
+    <tbody>
+    <!-- Se carga dinámicamente -->
+    </tbody>
+</table>
+
+<!-- Formulario para agregar o editar película -->
+<h2 id="formTitle">Agregar nueva película</h2>
+<form id="agregarPelicula">
+    <input type="hidden" id="codigo_pelicula">  <!-- oculto, para editar -->
+    <input type="text" id="titulo" placeholder="Título" required>
+    <input type="text" id="idioma" placeholder="Idioma" required>
+    <input type="text" id="genero" placeholder="Género" required>
+    <input type="text" id="formato" placeholder="Formato" required>
+    <input type="number" id="codigo_productora" placeholder="Código de Productora" required>
+    <button type="submit">Guardar</button>
+</form>
+
+<script>
+    function cargarPeliculas() {
+        fetch("/peliculas")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#tabla-peliculas tbody");
+                tbody.innerHTML = "";
+
+                data.forEach(p => {
+                    const fila = document.createElement("tr");
+                    fila.innerHTML = `
+                        <td>${p.codigo_pelicula}</td>
+                        <td>${p.titulo}</td>
+                        <td>${p.idioma}</td>
+                        <td>${p.formato}</td>
+                        <td>${p.genero}</td>
+                        <td>${p.codigo_productora}</td>
+                        <td>
+                            <button onclick="editarPelicula(${p.codigo_pelicula}, '${p.titulo}', '${p.idioma}', '${p.formato}', '${p.genero}', ${p.codigo_productora})">✏️ Editar</button>
+                            <button onclick="eliminarPelicula(${p.codigo_pelicula})">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            });
+    }
+
+    cargarPeliculas();
+
+    document.getElementById("agregarPelicula").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const pelicula = {
+            titulo: document.getElementById("titulo").value,
+            idioma: document.getElementById("idioma").value,
+            genero: document.getElementById("genero").value,
+            formato: document.getElementById("formato").value,
+            codigo_productora: parseInt(document.getElementById("codigo_productora").value)
+        };
+
+        const rawId = document.getElementById("codigo_pelicula").value;
+        const id = rawId && rawId.trim() !== "" ? rawId : null;
+
+        const url = id ? `/peliculas/${id}` : "/peliculas";
+        const method = id ? "PUT" : "POST";
+
+
+
+
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(pelicula)
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert(id ? "Película actualizada" : "Película agregada");
+                    document.getElementById("agregarPelicula").reset();
+                    document.getElementById("formTitle").textContent = "Agregar nueva película";
+                    document.getElementById("codigo_pelicula").value = "";
+                    cargarPeliculas();
+                } else {
+                    alert("Error al guardar la película");
+                }
+            });
+    });
+
+    function editarPelicula(id, titulo, idioma, formato, genero, codigo_productora) {
+        document.getElementById("formTitle").textContent = "Editar película";
+        document.getElementById("codigo_pelicula").value = id;
+        document.getElementById("titulo").value = titulo;
+        document.getElementById("idioma").value = idioma;
+        document.getElementById("formato").value = formato;
+        document.getElementById("genero").value = genero;
+        document.getElementById("codigo_productora").value = codigo_productora;
+    }
+
+    function eliminarPelicula(id) {
+        if (confirm("¿Estás seguro de que querés eliminar esta película?")) {
+            fetch(`/peliculas/${id}`, {
+                method: "DELETE"
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert("Película eliminada");
+                        cargarPeliculas();
+                    } else {
+                        alert("Error al eliminar");
+                    }
+                });
+        }
+    }
+</script>
+
+</body>
+</html>

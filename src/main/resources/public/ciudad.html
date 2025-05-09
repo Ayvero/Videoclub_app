@@ -1,0 +1,159 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ciudades</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <ul>
+        <li><a href="index.html">Películas</a></li>
+        <li><a href="ciudad.html">Ciudades</a></li>
+        <li><a href="departamento.html">Departamentos</a></li>
+        <li><a href="pais.html">Paises</a></li>
+        <li><a href="distribuidor.html">Distribuidores</a></li>
+        <li><a href="productora.html">Productoras</a></li>
+        <li><a href="internacional.html">Internacionales</a></li>
+        <li><a href="nacional.html">Nacionales</a></li>
+        <li><a href="empleado.html">Empleados</a></li>
+        <li><a href="entrega.html">Entregas</a></li>
+        <li><a href="pelisMasEntregadas.html">Peliculas más entregadas</a></li>
+        <li><a href="tarea.html">Tareas</a></li>
+        <li><a href="video.html">Videos</a></li>
+        <li><a href="renglonEntrega.html">Renglón Entregas</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <h1>🎬 Videoteca</h1>
+
+    <table id="tabla-Mostrar">
+        <thead>
+        <tr>
+            <th>ID Ciudad</th>
+            <th>Nombre Ciudad</th>
+            <th>ID País</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Se carga dinámicamente -->
+        </tbody>
+    </table>
+
+    <h2 id="formTitle">Agregar nueva ciudad</h2>
+    <form id="agregar">
+        <input type="text" id="id_ciudad" placeholder="ID Ciudad" required>
+        <input type="text" id="nombre_ciudad" placeholder="Nombre Ciudad" required>
+        <input type="text" id="id_pais" placeholder="ID País" required>
+        <button type="submit">Guardar</button>
+    </form>
+</div>
+
+<script>
+    let modoEditar = false;
+    let idEditar = null;
+
+    function cargar() {
+        fetch("/ciudades")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#tabla-Mostrar tbody");
+                tbody.innerHTML = "";
+
+                data.forEach(c => {
+                    const fila = document.createElement("tr");
+                    fila.innerHTML = `
+                        <td>${c.id_ciudad}</td>
+                        <td>${c.nombre_ciudad}</td>
+                        <td>${c.id_pais}</td>
+                        <td>
+                            <button onclick="editar('${c.id_ciudad}', '${c.nombre_ciudad}', '${c.id_pais}')">✏️ Editar</button>
+                            <button onclick="eliminar('${c.id_ciudad}')">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            });
+    }
+
+    cargar();
+
+    document.getElementById("agregar").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const ciudad = {
+            id_ciudad: document.getElementById("id_ciudad").value,
+            nombre_ciudad: document.getElementById("nombre_ciudad").value,
+            id_pais: document.getElementById("id_pais").value
+        };
+
+        let url = "/ciudades";
+        let method = "POST";
+
+        if (modoEditar) {
+            url = `/ciudades/${idEditar}`;
+            method = "PUT";
+        }
+
+        fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(ciudad)
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => { throw new Error(text); });
+                }
+                return res.text();
+            })
+            .then(() => {
+                alert(modoEditar ? "Ciudad actualizada" : "Ciudad agregada");
+                document.getElementById("agregar").reset();
+                document.getElementById("formTitle").textContent = "Agregar nueva ciudad";
+                document.getElementById("id_ciudad").disabled = false;
+                modoEditar = false;
+                idEditar = null;
+                cargar();
+            })
+            .catch(err => {
+                alert("Error: " + err.message);
+            });
+    });
+
+    function editar(id_ciudad, nombre_ciudad, id_pais) {
+        modoEditar = true;
+        idEditar = id_ciudad;
+
+        document.getElementById("formTitle").textContent = "Editar ciudad";
+        document.getElementById("id_ciudad").value = id_ciudad;
+        document.getElementById("nombre_ciudad").value = nombre_ciudad;
+        document.getElementById("id_pais").value = id_pais;
+        document.getElementById("id_ciudad").disabled = true;
+    }
+
+    function eliminar(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar esta ciudad?")) {
+            fetch(`/ciudades/${id}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    alert("Ciudad eliminada con éxito.");
+                    cargar();
+                })
+                .catch(error => {
+                    alert("Error al eliminar ciudad: " + error.message);
+                });
+        }
+    }
+</script>
+
+</body>
+</html>

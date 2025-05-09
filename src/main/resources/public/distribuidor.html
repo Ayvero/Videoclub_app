@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Distribuidores</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <ul>
+    <li><a href="index.html">Películas</a></li>
+    <li><a href="ciudad.html">Ciudades</a></li>
+    <li><a href="departamento.html">Departamentos</a></li>
+    <li><a href="pais.html">Paises</a></li>
+    <li><a href="distribuidor.html">Distribuidores</a></li>
+    <li><a href="productora.html">Productoras</a></li>
+    <li><a href="internacional.html">Internacionales</a></li>
+    <li><a href="nacional.html">Nacionales</a></li>
+    <li><a href="empleado.html">Empleados</a></li>
+    <li><a href="entrega.html">Entregas</a></li>
+    <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+    <li><a href="tarea.html">Tareas</a></li>
+    <li><a href="video.html">Videos</a></li>
+    <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+
+  </ul>
+</nav>
+
+<div class="container">
+
+
+<h1>🎬 Videoteca</h1>
+
+<!-- Tabla de Países -->
+<table id="tabla-dist">
+  <thead>
+  <tr>
+    <th>ID del distribuidor</th>
+    <th>Nombre del distribuidor</th>
+    <th>Direccion</th>
+    <th>Telefono</th>
+    <th>Tipo</th>
+    <th>Acciones</th>
+
+  </tr>
+  </thead>
+</div>
+  <tbody>
+  <!-- Se carga dinámicamente -->
+  </tbody>
+</table>
+
+<!-- Formulario para agregar o editar país -->
+<h2 id="formTitle">Agregar nuevo distribuidor</h2>
+<form id="agregarDistribuidor">
+  <input type="text" id="id_distribuidor" placeholder="ID del distribuidor" required>
+  <input type="text" id="nombre" placeholder="Nombre" required>
+  <input type="text" id="direccion" placeholder="Direccion" required>
+  <input type="text" id="telefono" placeholder="Telefono" required>
+  <input type="text" id="tipo" placeholder="Tipo" required>
+
+
+  <button type="submit">Guardar</button>
+</form>
+
+<script>
+  let modoEditar = false; // Variable global para saber si estamos editando
+  let idDistribuidorEditar = null;
+
+  function cargarDistribuidor() {
+    fetch("/distribuidores")
+            .then(res => res.json())
+            .then(data => {
+              const tbody = document.querySelector("#tabla-dist tbody");
+              tbody.innerHTML = "";
+
+              data.forEach(p => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+            <td>${p.id_distribuidor}</td>
+            <td>${p.nombre}</td>
+            <td>${p.direccion}</td>
+            <td>${p.telefono}</td>
+            <td>${p.tipo}</td>
+
+
+            <td>
+              <button onclick="editar('${p.id_distribuidor}', '${p.nombre}','${p.direccion}', '${p.telefono}','${p.tipo}')">✏️ Editar</button>
+              <button onclick="eliminar('${p.id_distribuidor}')">🗑️ Eliminar</button>
+            </td>
+          `;
+                tbody.appendChild(fila);
+              });
+            });
+  }
+
+  cargarDistribuidor();
+
+  document.getElementById("agregarDistribuidor").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const distribuidor = {
+      id_distribuidor: document.getElementById("id_distribuidor").value,
+      nombre: document.getElementById("nombre").value,
+      direccion: document.getElementById("direccion").value,
+      telefono: document.getElementById("telefono").value,
+      tipo: document.getElementById("tipo").value
+
+    };
+
+    let url = "/distribuidores";
+    let method = "POST";
+
+    if (modoEditar) {
+      url = `/distribuidores/${idDistribuidorEditar}`;
+      method = "PUT";
+    }
+
+    fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(distribuidor)
+    })
+            .then(res => {
+              if (!res.ok) {
+                return res.text().then(text => { throw new Error(text); });
+              }
+              return res.text();
+            })
+            .then(() => {
+              alert(modoEditar ? "Distribuidor actualizado" : "Distribuidor agregado");
+              document.getElementById("agregarDistribuidor").reset();
+              document.getElementById("formTitle").textContent = "Agregar nuevo distribuidor";
+              document.getElementById("id_distribuidor").disabled = false; // Volvemos a habilitar el ID
+              modoEditar = false;
+              idDistribuidorEditar = null;
+              cargarDistribuidor();
+            })
+            .catch(err => {
+              alert("Error: " + err.message);
+            });
+  });
+
+  function editar(id_distribuidor, nombre, direccion, telefono, tipo) {
+    modoEditar = true;
+    idDistribuidorEditar = id_distribuidor;
+
+    document.getElementById("formTitle").textContent = "Editar distribuidor";
+    document.getElementById("id_distribuidor").value = id_distribuidor;
+    document.getElementById("nombre").value = nombre;
+    document.getElementById("direccion").value = direccion;
+    document.getElementById("telefono").value = telefono;
+    document.getElementById("tipo").value = tipo;
+
+
+    document.getElementById("id_distribuidor").disabled = true; // No dejamos editar el ID
+  }
+
+  function eliminar(id) {
+    if (confirm("¿Estás seguro de que deseas eliminar este distribuidor?")) {
+      fetch(`/distribuidores/${id}`, {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (!response.ok) {
+                  return response.text().then(text => { throw new Error(text); });
+                }
+                alert("Distribuidor eliminado con éxito.");
+                cargarDistribuidor();
+              })
+              .catch(error => {
+                alert("Error al eliminar país: " + error.message);
+              });
+    }
+  }
+</script>
+
+</body>
+</html>

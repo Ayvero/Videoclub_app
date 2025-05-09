@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paises</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <ul>
+    <li><a href="index.html">Películas</a></li>
+    <li><a href="ciudad.html">Ciudades</a></li>
+    <li><a href="departamento.html">Departamentos</a></li>
+    <li><a href="pais.html">Paises</a></li>
+    <li><a href="distribuidor.html">Distribuidores</a></li>
+    <li><a href="productora.html">Productoras</a></li>
+    <li><a href="internacional.html">Internacionales</a></li>
+    <li><a href="nacional.html">Nacionales</a></li>
+    <li><a href="empleado.html">Empleados</a></li>
+    <li><a href="entrega.html">Entregas</a></li>
+    <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
+    <li><a href="tarea.html">Tareas</a></li>
+    <li><a href="video.html">Videos</a></li>
+    <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+<h1>🎬 Videoteca</h1>
+
+<!-- Tabla de Países -->
+<table id="tabla-pais">
+  <thead>
+  <tr>
+    <th>ID del País</th>
+    <th>Nombre del País</th>
+    <th>Acciones</th>
+  </tr>
+  </thead>
+</div>
+  <tbody>
+  <!-- Se carga dinámicamente -->
+  </tbody>
+</table>
+
+<!-- Formulario para agregar o editar país -->
+<h2 id="formTitle">Agregar nuevo país</h2>
+<form id="agregarPais">
+  <input type="text" id="id_pais" placeholder="ID del país" required>
+  <input type="text" id="nombre_pais" placeholder="Nombre del país" required>
+  <button type="submit">Guardar</button>
+</form>
+
+<script>
+  let modoEditar = false; // Variable global para saber si estamos editando
+  let idPaisEditar = null;
+
+  function cargarPais() {
+    fetch("/paises")
+            .then(res => res.json())
+            .then(data => {
+              const tbody = document.querySelector("#tabla-pais tbody");
+              tbody.innerHTML = "";
+
+              data.forEach(p => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+            <td>${p.id_pais}</td>
+            <td>${p.nombre_pais}</td>
+            <td>
+              <button onclick="editar('${p.id_pais}', '${p.nombre_pais}')">✏️ Editar</button>
+              <button onclick="eliminar('${p.id_pais}')">🗑️ Eliminar</button>
+            </td>
+          `;
+                tbody.appendChild(fila);
+              });
+            });
+  }
+
+  cargarPais();
+
+  document.getElementById("agregarPais").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const pais = {
+      id_pais: document.getElementById("id_pais").value,
+      nombre_pais: document.getElementById("nombre_pais").value
+    };
+
+    let url = "/paises";
+    let method = "POST";
+
+    if (modoEditar) {
+      url = `/paises/${idPaisEditar}`;
+      method = "PUT";
+    }
+
+    fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(pais)
+    })
+            .then(res => {
+              if (!res.ok) {
+                return res.text().then(text => { throw new Error(text); });
+              }
+              return res.text();
+            })
+            .then(() => {
+              alert(modoEditar ? "País actualizado" : "País agregado");
+              document.getElementById("agregarPais").reset();
+              document.getElementById("formTitle").textContent = "Agregar nuevo país";
+              document.getElementById("id_pais").disabled = false; // Volvemos a habilitar el ID
+              modoEditar = false;
+              idPaisEditar = null;
+              cargarPais();
+            })
+            .catch(err => {
+              alert("Error: " + err.message);
+            });
+  });
+
+  function editar(id_pais, nombre_pais) {
+    modoEditar = true;
+    idPaisEditar = id_pais;
+
+    document.getElementById("formTitle").textContent = "Editar país";
+    document.getElementById("id_pais").value = id_pais;
+    document.getElementById("nombre_pais").value = nombre_pais;
+    document.getElementById("id_pais").disabled = true; // No dejamos editar el ID
+  }
+
+  function eliminar(id) {
+    if (confirm("¿Estás seguro de que deseas eliminar este país?")) {
+      fetch(`/paises/${id}`, {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (!response.ok) {
+                  return response.text().then(text => { throw new Error(text); });
+                }
+                alert("País eliminado con éxito.");
+                cargarPais();
+              })
+              .catch(error => {
+                alert("Error al eliminar país: " + error.message);
+              });
+    }
+  }
+</script>
+
+</body>
+</html>
