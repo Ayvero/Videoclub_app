@@ -28,7 +28,7 @@ A web-based movie rental management system built using Java, Javalin, HTML, and 
 
 ### 🇪🇸 Versión en Español
 
-```markdown
+
 # 🎬 Aplicación Videoteca
 
 Un sistema de gestión de alquiler de películas basado en la web, desarrollado con Java, Javalin, HTML y JavaScript.
