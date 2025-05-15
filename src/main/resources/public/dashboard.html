@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administración - Videoteca</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+    <h1 class="dashboard-title">🎬 Panel de Administración de la Videoteca</h1>
+    <p class="dashboard-subtitle">Bienvenido. Elegí qué querés administrar:</p>
+
+    <div class="botones-dashboard">
+        <button onclick="location.href='index.html'">📽️ Películas</button>
+        <button onclick="location.href='ciudad.html'">🏙️ Ciudades</button>
+        <button onclick="location.href='departamento.html'">📌 Departamentos</button>
+        <button onclick="location.href='pais.html'">🌍 Paises</button>
+        <button onclick="location.href='distribuidor.html'">🚚 Distribuidores</button>
+        <button onclick="location.href='productora.html'">🏭 Productoras</button>
+        <button onclick="location.href='internacional.html'">🌐 Internacionales</button>
+        <button onclick="location.href='nacional.html'">🇦🇷 Nacionales</button>
+        <button onclick="location.href='empleado.html'">👥 Empleados</button>
+        <button onclick="location.href='entrega.html'">📦 Entregas</button>
+        <button onclick="location.href='pelisMasEntregadas.html'">📊 Pelis más entregadas</button>
+        <button onclick="location.href='tarea.html'">📝 Tareas</button>
+        <button onclick="location.href='video.html'">🎞️ Videos</button>
+        <button onclick="location.href='renglonEntrega.html'">📄 Renglón Entregas</button>
+    </div>
+
+    <button class="cerrar-sesion" onclick="cerrarSesion()">🔒 Cerrar sesión</button>
+</div>
+
+<script>
+    function cerrarSesion() {
+        alert("Sesión cerrada");
+        window.location.href = "inicio.html";
+    }
+</script>
+</body>
+</html>

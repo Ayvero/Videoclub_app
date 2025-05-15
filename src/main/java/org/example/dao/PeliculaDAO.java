@@ -5,7 +5,9 @@ import org.example.model.Pelicula;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PeliculaDAO {
 
@@ -104,6 +106,73 @@ public class PeliculaDAO {
                 e.printStackTrace();
             }
         }
+
+    public static List<Pelicula> buscarPorGenero(String genero) {
+        List<Pelicula> lista = new ArrayList<>();
+
+        try (Connection conn = Database.connect()) {
+            String sql = "SELECT * FROM pelicula WHERE LOWER(genero) = LOWER(?)";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, genero);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(new Pelicula(
+                        rs.getInt("codigo_pelicula"),
+                        rs.getString("titulo"),
+                        rs.getString("idioma"),
+                        rs.getString("formato"),
+                        rs.getString("genero"),
+                        rs.getInt("codigo_productora")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public static List<Pelicula> filtrarPorCampo(String campo, String valor) {
+        List<Pelicula> lista = new ArrayList<>();
+
+        // Seguridad básica para evitar inyecciones SQL
+        List<String> camposPermitidos = List.of("titulo", "idioma", "formato", "genero");
+        if (!camposPermitidos.contains(campo)) return lista;
+
+        String sql = "SELECT * FROM pelicula WHERE " + campo + " ILIKE ?";
+
+
+        try (Connection conn = Database.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + valor + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(new Pelicula(
+                        rs.getInt("codigo_pelicula"),
+                        rs.getString("titulo"),
+                        rs.getString("idioma"),
+                        rs.getString("formato"),
+                        rs.getString("genero"),
+                        rs.getInt("codigo_productora")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
+
+
+
 
 
 

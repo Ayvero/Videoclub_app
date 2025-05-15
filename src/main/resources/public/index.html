@@ -7,88 +7,104 @@
 </head>
 <body>
 
-<!-- navbar.html o como parte de cada archivo -->
-<nav class="navbar">
-    <ul>
-        <li><a href="index.html">Películas</a></li>
-        <li><a href="ciudad.html">Ciudades</a></li>
-        <li><a href="departamento.html">Departamentos</a></li>
-        <li><a href="pais.html">Paises</a></li>
-        <li><a href="distribuidor.html">Distribuidores</a></li>
-        <li><a href="productora.html">Productoras</a></li>
-        <li><a href="internacional.html">Internacionales</a></li>
-        <li><a href="nacional.html">Nacionales</a></li>
-        <li><a href="empleado.html">Empleados</a></li>
-        <li><a href="entrega.html">Entregas</a></li>
-        <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
-        <li><a href="tarea.html">Tareas</a></li>
-        <li><a href="video.html">Videos</a></li>
-        <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
-        <li><a href="entrega.html">Entregas</a></li>
+<!-- Navbar -->
+<div class="top-bar">
+    <button onclick="location.href='dashboard.html'">🏠 Volver al inicio</button>
+</div>
 
-    </ul>
-</nav>
 
 <div class="container">
-<h1>🎬 Videoteca</h1>
+    <h1>🎬 Videoteca</h1>
 
-<!-- Tabla de Películas -->
-<table id="tabla-peliculas">
-    <thead>
-    <tr>
-        <th>Código</th>
-        <th>Título</th>
-        <th>Idioma</th>
-        <th>Formato</th>
-        <th>Género</th>
-        <th>Productora</th>
-        <th>Acciones</th>
-    </tr>
+    <!-- Tabla de Películas -->
+    <table id="tabla-peliculas">
+        <thead>
+        <tr>
+            <th>Código</th>
+            <th>Título</th>
+            <th>Idioma</th>
+            <th>Formato</th>
+            <th>Género</th>
+            <th>Productora</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Se carga dinámicamente -->
+        </tbody>
+    </table>
 
-    </thead>
+    <!-- Formulario para agregar o editar película -->
+    <h2 id="formTitle">Agregar nueva película</h2>
+    <form id="agregarPelicula">
+        <input type="hidden" id="codigo_pelicula">
+        <input type="text" id="titulo" placeholder="Título" required>
+        <input type="text" id="idioma" placeholder="Idioma" required>
+        <input type="text" id="genero" placeholder="Género" required>
+        <input type="text" id="formato" placeholder="Formato" required>
+        <input type="number" id="codigo_productora" placeholder="Código de Productora" required>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <!-- Filtro por género -->
+    <h2>Buscar por:</h2>
+    <select id="campo-filtro">
+        <option value="titulo">Título</option>
+        <option value="idioma">Idioma</option>
+        <option value="formato">Formato</option>
+        <option value="genero">Género</option>
+    </select>
+    <input type="text" id="valor-filtro" placeholder="Buscar...">
+    <button onclick="filtrar()">Filtrar</button>
+
+
+
 </div>
-    <tbody>
-    <!-- Se carga dinámicamente -->
-    </tbody>
-</table>
 
-<!-- Formulario para agregar o editar película -->
-<h2 id="formTitle">Agregar nueva película</h2>
-<form id="agregarPelicula">
-    <input type="hidden" id="codigo_pelicula">  <!-- oculto, para editar -->
-    <input type="text" id="titulo" placeholder="Título" required>
-    <input type="text" id="idioma" placeholder="Idioma" required>
-    <input type="text" id="genero" placeholder="Género" required>
-    <input type="text" id="formato" placeholder="Formato" required>
-    <input type="number" id="codigo_productora" placeholder="Código de Productora" required>
-    <button type="submit">Guardar</button>
-</form>
+<footer>
+    <button onclick="location.href='index.html'">Películas</button>
+    <button onclick="location.href='ciudad.html'">Ciudades</button>
+    <button onclick="location.href='departamento.html'">Departamentos</button>
+    <button onclick="location.href='pais.html'">Países</button>
+    <button onclick="location.href='distribuidor.html'">Distribuidores</button>
+    <button onclick="location.href='productora.html'">Productoras</button>
+    <button onclick="location.href='empleado.html'">Empleados</button>
+    <button onclick="location.href='entrega.html'">Entregas</button>
+    <button onclick="location.href='pelisMasEntregadas.html'">+ Entregadas</button>
+    <button onclick="location.href='tarea.html'">Tareas</button>
+    <button onclick="location.href='video.html'">Videos</button>
+    <button onclick="location.href='renglonEntrega.html'">Renglones</button>
+    <button onclick="location.href='internacional.html'">Internacional</button>
+    <button onclick="location.href='nacional.html'">Nacional</button>
+</footer>
 
 <script>
     function cargarPeliculas() {
         fetch("/peliculas")
             .then(res => res.json())
-            .then(data => {
-                const tbody = document.querySelector("#tabla-peliculas tbody");
-                tbody.innerHTML = "";
+            .then(data => renderizarPeliculas(data));
+    }
 
-                data.forEach(p => {
-                    const fila = document.createElement("tr");
-                    fila.innerHTML = `
-                        <td>${p.codigo_pelicula}</td>
-                        <td>${p.titulo}</td>
-                        <td>${p.idioma}</td>
-                        <td>${p.formato}</td>
-                        <td>${p.genero}</td>
-                        <td>${p.codigo_productora}</td>
-                        <td>
-                            <button onclick="editarPelicula(${p.codigo_pelicula}, '${p.titulo}', '${p.idioma}', '${p.formato}', '${p.genero}', ${p.codigo_productora})">✏️ Editar</button>
-                            <button onclick="eliminarPelicula(${p.codigo_pelicula})">🗑️ Eliminar</button>
-                        </td>
-                    `;
-                    tbody.appendChild(fila);
-                });
-            });
+    function renderizarPeliculas(data) {
+        const tbody = document.querySelector("#tabla-peliculas tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(p => {
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+                <td>${p.codigo_pelicula}</td>
+                <td>${p.titulo}</td>
+                <td>${p.idioma}</td>
+                <td>${p.formato}</td>
+                <td>${p.genero}</td>
+                <td>${p.codigo_productora}</td>
+                <td>
+                    <button onclick="editarPelicula(${p.codigo_pelicula}, '${p.titulo}', '${p.idioma}', '${p.formato}', '${p.genero}', ${p.codigo_productora})">✏️ Editar</button>
+                    <button onclick="eliminarPelicula(${p.codigo_pelicula})">🗑️ Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
     }
 
     cargarPeliculas();
@@ -109,10 +125,6 @@
 
         const url = id ? `/peliculas/${id}` : "/peliculas";
         const method = id ? "PUT" : "POST";
-
-
-
-
 
         fetch(url, {
             method: method,
@@ -159,6 +171,40 @@
                 });
         }
     }
+
+    function filtrarPorGenero() {
+        const genero = document.getElementById('input-genero').value;
+
+        fetch(`/peliculas/filtrar-genero?genero=${encodeURIComponent(genero)}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Error al filtrar");
+                return response.json();
+            })
+            .then(data => renderizarPeliculas(data))
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Error al filtrar por género");
+            });
+    }
+
+    function filtrar() {
+        const campo = document.getElementById("campo-filtro").value;
+        const valor = document.getElementById("valor-filtro").value;
+
+        fetch(`/peliculas/filtrar?campo=${campo}&valor=${encodeURIComponent(valor)}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Error al filtrar");
+                return res.json();
+            })
+            .then(data => {
+                renderizarPeliculas(data); // misma función que ya usás
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Error al filtrar");
+            });
+    }
+
 </script>
 
 </body>

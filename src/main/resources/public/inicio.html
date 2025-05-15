@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Videoteca - Inicio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="inicio-container">
+  <h1>🎥 Bienvenido a VideotecaApp</h1>
+  <p>Administrá tu videoteca de manera sencilla y rápida.</p>
+
+  <!-- Acceso a Login -->
+  <div class="login-section">
+    <h2>Ingresá a tu cuenta</h2>
+    <form id="loginForm">
+      <input type="text" id="nombre_usuario" placeholder="Usuario" required>
+      <input type="password" id="contrasena" placeholder="Contraseña" required>
+      <button type="submit">Iniciar Sesión</button>
+      <p><a href="#" onclick="recuperarContrasena()">¿Olvidaste tu contraseña?</a></p>
+    </form>
+  </div>
+
+  <!-- Sección de recuperación de contraseña (opcional para mostrar luego) -->
+  <div id="recuperar-contenedor" style="display: none;">
+    <h3>Recuperar contraseña</h3>
+    <input type="email" id="email-recuperacion" placeholder="Correo electrónico">
+    <button onclick="enviarRecuperacion()">Enviar</button>
+  </div>
+</div>
+
+<script>
+
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const nombre_usuario = document.getElementById("nombre_usuario").value;
+    const contrasena = document.getElementById("contrasena").value;
+
+    fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre_usuario, contrasena })
+    })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(({ status, body }) => {
+              if (status === 200 && body.success) {
+                window.location.href = "dashboard.html"; // o la página que quieras mostrar al usuario logueado
+              } else {
+                alert("Error al iniciar sesión: " + body.message);
+              }
+            })
+            .catch(err => {
+              alert("Error de red o del servidor: " + err);
+            });
+  });
+
+
+  function recuperarContrasena() {
+    document.getElementById("recuperar-contenedor").style.display = "block";
+  }
+
+  function enviarRecuperacion() {
+    const email = document.getElementById("email-recuperacion").value;
+    alert("Se enviará un enlace de recuperación a: " + email);
+    // Aquí iría el fetch real si tuvieras backend de email
+  }
+</script>
+</body>
+</html>

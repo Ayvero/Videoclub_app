@@ -7,25 +7,10 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <ul>
-        <li><a href="index.html">Películas</a></li>
-        <li><a href="ciudad.html">Ciudades</a></li>
-        <li><a href="departamento.html">Departamentos</a></li>
-        <li><a href="pais.html">Paises</a></li>
-        <li><a href="distribuidor.html">Distribuidores</a></li>
-        <li><a href="productora.html">Productoras</a></li>
-        <li><a href="internacional.html">Internacionales</a></li>
-        <li><a href="nacional.html">Nacionales</a></li>
-        <li><a href="empleado.html">Empleados</a></li>
-        <li><a href="entrega.html">Entregas</a></li>
-        <li><a href="pelisMasEntregadas.html">Peliculas mas entregadas</a></li>
-        <li><a href="tarea.html">Tareas</a></li>
-        <li><a href="video.html">Videos</a></li>
-        <li><a href="renglonEntrega.html">Renglon Entregas</a></li>
+<div class="top-bar">
+    <button onclick="location.href='dashboard.html'">🏠 Volver al inicio</button>
+</div>
 
-    </ul>
-</nav>
 <div class="container">
     <h1>🎬 Videoteca</h1>
 
@@ -40,7 +25,7 @@
         </tr>
         </thead>
 
-</div>
+
 <tbody>
 <!-- Se carga dinámicamente -->
 </tbody>
@@ -56,6 +41,27 @@
 
     <button type="submit">Guardar</button>
 </form>
+
+
+</div>
+
+<footer>
+    <button onclick="location.href='index.html'">Películas</button>
+    <button onclick="location.href='ciudad.html'">Ciudades</button>
+    <button onclick="location.href='departamento.html'">Departamentos</button>
+    <button onclick="location.href='pais.html'">Países</button>
+    <button onclick="location.href='distribuidor.html'">Distribuidores</button>
+    <button onclick="location.href='productora.html'">Productoras</button>
+    <button onclick="location.href='empleado.html'">Empleados</button>
+    <button onclick="location.href='entrega.html'">Entregas</button>
+    <button onclick="location.href='pelisMasEntregadas.html'">+ Entregadas</button>
+    <button onclick="location.href='tarea.html'">Tareas</button>
+    <button onclick="location.href='video.html'">Videos</button>
+    <button onclick="location.href='renglonEntrega.html'">Renglones</button>
+    <button onclick="location.href='internacional.html'">Internacional</button>
+    <button onclick="location.href='nacional.html'">Nacional</button>
+</footer>
+
 
 <script>
     let modoEditar = false; // Variable global para saber si estamos editando

@@ -15,7 +15,7 @@ public class Main {
         }).start(port); // Usar el puerto dinámico
 
         // Redirige la raíz a 'index.html'
-        app.get("/", ctx -> ctx.redirect("/index.html"));
+        app.get("/", ctx -> ctx.redirect("/inicio.html"));
 
         // Registrar rutas para las entidades
         PeliculaController.registrarRutas(app);
@@ -32,5 +32,7 @@ public class Main {
         VideoController.registrarRutas(app);
         TareaController.registrarRutas(app);
         EmpleadoController.registrarRutas(app);
+        app.post("/login", UsuarioController::login);
+
     }
 }
