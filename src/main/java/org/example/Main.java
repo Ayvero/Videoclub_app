@@ -4,8 +4,16 @@ import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import org.example.controller.*;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+
 public class Main {
     public static void main(String[] args) {
+
+
+
+
         // Obtener el puerto de la variable de entorno 'PORT' o usar 7070 como valor predeterminado
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
 
@@ -15,7 +23,7 @@ public class Main {
         }).start(port); // Usar el puerto dinámico
 
         // Redirige la raíz a 'index.html'
-        app.get("/", ctx -> ctx.redirect("/inicio.html"));
+        app.get("/", ctx -> ctx.redirect("/dashboard.html"));
 
         // Registrar rutas para las entidades
         PeliculaController.registrarRutas(app);
