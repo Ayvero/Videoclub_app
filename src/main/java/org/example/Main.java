@@ -23,7 +23,7 @@ public class Main {
         }).start(port); // Usar el puerto dinámico
 
         // Redirige la raíz a 'index.html'
-        app.get("/", ctx -> ctx.redirect("/dashboard.html"));
+        app.get("/", ctx -> ctx.redirect("/inicio.html"));
 
         // Registrar rutas para las entidades
         PeliculaController.registrarRutas(app);
