@@ -51,3 +51,8 @@ Un sistema de gestión de alquiler de películas basado en la web, desarrollado 
 1. Cloná el repositorio:
    ```bash
    git clone https://github.com/tu_usuario/videoteca-app.git
+
+2. Para probar la base de datos utilizar el archivo : queries_creates.sql
+
+3. Se puede evr el funcionamiento de la estructura, en render:   https://appvideoclub.onrender.com
+   (No es posible acceder desde render a la base de datos, asi que solo se puede apreciar la estructura visual y el funcionamiento)
